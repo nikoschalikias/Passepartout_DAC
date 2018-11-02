@@ -6,19 +6,21 @@
 
 ///SPI Interface
 SPI MCP4922_SPI(D11,D12,D13);//MOSI ,MISO ,SCK
-DigitalOut MCP4922_CS(D7);//CS
+DigitalOut MCP4922_CS(D10);//CS
 
+AnalogIn knob(A1);
 
+DigitalIn mode_s(D8);
 
 //Digital Output
-DigitalOut MCP4922_LDAC(D4);
-DigitalOut MCP4922_SHDN(D6);
+DigitalOut MCP4922_LDAC(D8);
+DigitalOut MCP4922_SHDN(D9);
 void volt_out(double volt)
 {
 
     uint16_t temp=((uint16_t)(volt*4096/3.33))&0x0fff;
     uint16_t MCP4922_Sent_Data = 0;
-    MCP4922_Sent_Data = 0x3000|temp;
+    MCP4922_Sent_Data = 0xB000|temp;
     //MCP4922_Sent_Data = 0x3fff;
     MCP4922_CS = 0;
 
@@ -43,7 +45,7 @@ int main()
     /******************************
      *****      setup       *******
      ******************************/
-
+    uint16_t volt_temp=0;
     /////////setup SPI//////////
     //set CS High
     MCP4922_CS=1;
@@ -52,7 +54,7 @@ int main()
     MCP4922_SPI.format(16,3);
 
     //set SPI Frequency @20MHz
-    MCP4922_SPI.frequency(20000000);
+    MCP4922_SPI.frequency(1000000);
 
     //set Load DAC High (inactive)
     MCP4922_LDAC = 1;
@@ -62,9 +64,9 @@ int main()
 
     //loop
     while(1) {
-        for(double x=0; x<2*3.141592; x+=0.00001) {
-            volt_out((sin(x)+1.00)*3.33/2.00);
-        }
-
-    }
+             /* if(mode_s)volt_temp=uint16_t(3.33-knob.read()*3.33);
+              else volt_temp=uint16_t(knob.read()*3.33);
+              volt_out(volt_temp); */
+              volt_out(2.5);
+           }
 }
